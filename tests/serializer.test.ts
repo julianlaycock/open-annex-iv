@@ -172,7 +172,7 @@ test('closes AIFReportingInfo', () => assert(xml.endsWith('</AIFReportingInfo>')
 console.log('\nSerializer: serializeAggregateAnnexIVToXml');
 const aggXml = serializeAggregateAnnexIVToXml([sampleReport, sampleReport]);
 test('produces valid aggregate XML', () => assert(aggXml.includes('<AIFReportingInfo'), 'missing root'));
-test('contains fund references', () => assert(aggXml.includes('AIFRecordInfo_FundName'), 'missing fund refs'));
+test('contains fund records', () => assert(aggXml.includes('<AIFRecordInfo>') && aggXml.includes('AIFNationalCode'), 'missing fund records'));
 test('empty input returns empty string', () => assert(serializeAggregateAnnexIVToXml([]) === '', 'should be empty'));
 
 // Summary

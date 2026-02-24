@@ -198,20 +198,15 @@ export function serializeAnnexIVToXml(report: AnnexIVReport): string {
     lines.push('        </AIFDepositaryInfo>');
   }
 
-  // Compliance status (extension)
-  lines.push('        <CaelithComplianceExtension>');
-  lines.push(`          ${tag('KYCCoveragePct', cs.kyc_coverage_pct)}`);
-  lines.push(`          ${tag('EligibleInvestorPct', cs.eligible_investor_pct)}`);
-  lines.push(`          ${tag('RecentViolations', cs.recent_violations)}`);
-  lines.push(`          ${tag('LastComplianceCheck', cs.last_compliance_check)}`);
-  lines.push('        </CaelithComplianceExtension>');
+  // Compliance status (non-ESMA metadata, included as XML comment for traceability)
+  lines.push(`        <!-- Compliance snapshot: KYC ${cs.kyc_coverage_pct}%, eligible ${cs.eligible_investor_pct}%, violations ${cs.recent_violations}, checked ${cs.last_compliance_check} -->`);
+
 
   lines.push(`        ${tag('GeneratedAt', report.generated_at)}`);
   lines.push(`        ${tag('ReportVersion', report.report_version)}`);
   lines.push('      </AIFRecordInfo>');
   lines.push('    </AIFMCompleteDescription>');
   lines.push('  </AIFMRecordInfo>');
-  lines.push(`  ${tag('Disclaimer', report.disclaimer)}`);
   lines.push('</AIFReportingInfo>');
 
   return lines.join('\n');
@@ -253,15 +248,31 @@ export function serializeAggregateAnnexIVToXml(reports: AnnexIVReport[]): string
   }
   lines.push(`      ${tag('AIFMReportingCode', memberState + 'AIFM' + (id.aif_national_code || '').substring(0, 8).toUpperCase())}`);
 
+  // Each fund gets a summary AIFRecordInfo entry
   for (const report of reports) {
-    lines.push(`      <!-- Fund: ${escapeXml(report.aif_identification.aif_name)} -->`);
-    lines.push(`      ${tag('AIFRecordInfo_FundName', report.aif_identification.aif_name)}`);
-    lines.push(`      ${tag('AIFRecordInfo_FundCode', report.aif_identification.aif_national_code)}`);
+    const rid = report.aif_identification;
+    const rpe = report.principal_exposures;
+    const rMemberState = mapDomicileToMemberState(rid.domicile);
+    const rQuarter = Math.ceil((new Date(rid.reporting_period.end).getMonth() + 1) / 3);
+    const rYear = new Date(rid.reporting_period.end).getFullYear().toString();
+    const rType = mapToPredominantAIFType(rid.aif_type, rid.aif_name);
+
+    lines.push('      <AIFRecordInfo>');
+    lines.push(`        ${tag('AIFNationalCode', rid.aif_national_code)}`);
+    lines.push(`        ${tag('AIFName', rid.aif_name)}`);
+    lines.push(`        ${tag('AIFEEAFlag', isEEADomicile(rid.domicile) ? 'true' : 'false')}`);
+    lines.push(`        ${tag('AIFReportingCode', rMemberState + 'AIF' + (rid.aif_national_code || '').substring(0, 8).toUpperCase())}`);
+    lines.push(`        ${tag('AIFDomicile', rid.domicile)}`);
+    lines.push(`        ${tag('ReportingPeriodType', `Q${rQuarter}`)}`);
+    lines.push(`        ${tag('ReportingPeriodYear', rYear)}`);
+    lines.push(`        ${tag('PredominantAIFType', rType)}`);
+    lines.push(`        ${tag('NetAssetValue', rpe.total_nav_eur)}`);
+    lines.push(`        ${tag('GrossAssetValue', rpe.total_aum_eur)}`);
+    lines.push('      </AIFRecordInfo>');
   }
 
   lines.push('    </AIFMCompleteDescription>');
   lines.push('  </AIFMRecordInfo>');
-  lines.push(`  ${tag('Disclaimer', first.disclaimer)}`);
   lines.push('</AIFReportingInfo>');
   return lines.join('\n');
 }

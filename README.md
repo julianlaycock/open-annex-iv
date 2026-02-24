@@ -1,12 +1,16 @@
 # open-annex-iv
 
+[![CI](https://github.com/julianlaycock/open-annex-iv/actions/workflows/ci.yml/badge.svg)](https://github.com/julianlaycock/open-annex-iv/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/open-annex-iv)](https://www.npmjs.com/package/open-annex-iv)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Open-source toolkit for generating **AIFMD Annex IV XML reports** — the regulatory filing every EU alternative investment fund manager (AIFM) must submit to their national competent authority (NCA) under [Article 24 of the AIFMD](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011L0061).
 
 **Zero dependencies. Pure functions. TypeScript-first.**
 
 ## Why this exists
 
-Every AIFM in Europe must file Annex IV reports — quarterly or annually — to regulators like BaFin (DE), CSSF (LU), AMF (FR), or CNMV (ES). The XML format follows ESMA's technical standards ([ESMA/2013/1358](https://www.esma.europa.eu/document/aifmd-reporting-it-technical-guidance-rev-4)), but there are **zero open-source tools** to generate it. Fund managers either pay €15-50K/yr for enterprise software or build fragile Excel-to-XML pipelines in-house.
+Every AIFM in Europe must file Annex IV reports — quarterly or annually — to regulators like BaFin (DE), CSSF (LU), AMF (FR), or CNMV (ES). The XML format follows ESMA's technical standards (ESMA/2013/1358), but there are **zero open-source tools** to generate it. Fund managers either pay €15-50K/yr for enterprise software or build fragile Excel-to-XML pipelines in-house.
 
 This library changes that.
 
