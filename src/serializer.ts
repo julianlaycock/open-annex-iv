@@ -248,13 +248,18 @@ export function serializeAggregateAnnexIVToXml(reports: AnnexIVReport[]): string
   }
   lines.push(`      ${tag('AIFMReportingCode', memberState + 'AIFM' + (id.aif_national_code || '').substring(0, 8).toUpperCase())}`);
 
-  // Each fund gets a summary AIFRecordInfo entry
+  // Each fund gets a complete AIFRecordInfo block
   for (const report of reports) {
     const rid = report.aif_identification;
+    const ric = report.investor_concentration;
     const rpe = report.principal_exposures;
+    const rlev = report.leverage;
+    const rrisk = report.risk_profile;
+    const rcs = report.compliance_status;
     const rMemberState = mapDomicileToMemberState(rid.domicile);
     const rQuarter = Math.ceil((new Date(rid.reporting_period.end).getMonth() + 1) / 3);
     const rYear = new Date(rid.reporting_period.end).getFullYear().toString();
+    const rPeriodType = `Q${rQuarter}`;
     const rType = mapToPredominantAIFType(rid.aif_type, rid.aif_name);
 
     lines.push('      <AIFRecordInfo>');
@@ -263,11 +268,152 @@ export function serializeAggregateAnnexIVToXml(reports: AnnexIVReport[]): string
     lines.push(`        ${tag('AIFEEAFlag', isEEADomicile(rid.domicile) ? 'true' : 'false')}`);
     lines.push(`        ${tag('AIFReportingCode', rMemberState + 'AIF' + (rid.aif_national_code || '').substring(0, 8).toUpperCase())}`);
     lines.push(`        ${tag('AIFDomicile', rid.domicile)}`);
-    lines.push(`        ${tag('ReportingPeriodType', `Q${rQuarter}`)}`);
+    lines.push(`        ${tag('AIFInceptionDate', rid.inception_date ? new Date(rid.inception_date).toISOString().split('T')[0] : null)}`);
+    lines.push(`        ${tag('ReportingPeriodType', rPeriodType)}`);
     lines.push(`        ${tag('ReportingPeriodYear', rYear)}`);
-    lines.push(`        ${tag('PredominantAIFType', rType)}`);
-    lines.push(`        ${tag('NetAssetValue', rpe.total_nav_eur)}`);
-    lines.push(`        ${tag('GrossAssetValue', rpe.total_aum_eur)}`);
+    lines.push(`        ${tag('ReportingPeriodStartDate', rid.reporting_period.start)}`);
+    lines.push(`        ${tag('ReportingPeriodEndDate', rid.reporting_period.end)}`);
+    lines.push(`        ${tag('AIFMasterFeederStatus', 'NONE')}`);
+    lines.push(`        ${tag('AIFBaseCurrencyDescription', rid.base_currency)}`);
+
+    // AIFCompleteDescription
+    lines.push('        <AIFCompleteDescription>');
+
+    // AIFPrincipalInfo
+    lines.push('          <AIFPrincipalInfo>');
+    lines.push(`            ${tag('AIFIdentification', rid.aif_national_code)}`);
+    lines.push('            <MainInstrumentsTraded>');
+    for (const a of rpe.asset_breakdown.slice(0, 5)) {
+      lines.push('              <MainInstrumentTraded>');
+      lines.push(`                ${tag('SubAssetType', mapAssetType(a.asset_type))}`);
+      lines.push(`                ${tag('InstrumentName', a.asset_name)}`);
+      lines.push(`                ${tag('PositionValue', a.value_eur)}`);
+      lines.push(`                ${tag('PositionRate', a.percentage_of_total)}`);
+      lines.push('              </MainInstrumentTraded>');
+    }
+    lines.push('            </MainInstrumentsTraded>');
+    lines.push(`            ${tag('PredominantAIFType', rType)}`);
+    lines.push(`            ${tag('SubAssetType', report.sub_asset_type || 'OTHR_OTHR')}`);
+    lines.push(`            ${tag('NetAssetValue', rpe.total_nav_eur)}`);
+    lines.push(`            ${tag('GrossAssetValue', rpe.total_aum_eur)}`);
+    lines.push(`            ${tag('BaseCurrencyDescription', rid.base_currency)}`);
+
+    // Investor concentration
+    lines.push('            <InvestorConcentration>');
+    lines.push(`              ${tag('ProfessionalInvestorConcentrationRate', getTypePct(ric.by_type, 'professional'))}`);
+    lines.push(`              ${tag('RetailInvestorConcentrationRate', getTypePct(ric.by_type, 'retail'))}`);
+    lines.push(`              ${tag('TopFiveBeneficialOwnersRate', ric.beneficial_owners_concentration.top_5_investors_pct)}`);
+    lines.push('            </InvestorConcentration>');
+
+    // Geographic focus
+    if (report.geographic_focus.length > 0) {
+      lines.push('            <AifmPrincipalMarkets>');
+      for (const g of report.geographic_focus.slice(0, 5)) {
+        lines.push('              <AIFMPrincipalMarket>');
+        lines.push(`                ${tag('MarketIdentification', toISOCountryCode(g.region))}`);
+        lines.push(`                ${tag('AggregateValueAmount', g.pct)}`);
+        lines.push('              </AIFMPrincipalMarket>');
+      }
+      lines.push('            </AifmPrincipalMarkets>');
+    }
+    lines.push('          </AIFPrincipalInfo>');
+
+    // AIFIndividualInfo
+    lines.push('          <AIFIndividualInfo>');
+
+    // Investor breakdown by domicile
+    lines.push('            <IndividualExposure>');
+    for (const d of ric.by_domicile.slice(0, 10)) {
+      lines.push('              <InvestorBreakdown>');
+      lines.push(`                ${tag('InvestorCountry', d.domicile)}`);
+      lines.push(`                ${tag('InvestorCount', d.count)}`);
+      lines.push(`                ${tag('InvestorPercentage', d.percentage_of_nav)}`);
+      lines.push('              </InvestorBreakdown>');
+    }
+    lines.push('            </IndividualExposure>');
+
+    // Counterparty risk
+    if (report.counterparty_risk.top_5_counterparties.length > 0) {
+      lines.push('            <CounterpartyRiskProfile>');
+      lines.push(`              ${tag('TotalCounterpartyExposure', report.counterparty_risk.total_counterparty_count)}`);
+      for (const cp of report.counterparty_risk.top_5_counterparties) {
+        lines.push('              <TopCounterparty>');
+        lines.push(`                ${tag('CounterpartyName', cp.name)}`);
+        if (cp.lei) lines.push(`                ${tag('CounterpartyLEI', cp.lei)}`);
+        lines.push(`                ${tag('ExposureRate', cp.exposure_pct)}`);
+        lines.push('              </TopCounterparty>');
+      }
+      lines.push('            </CounterpartyRiskProfile>');
+    }
+
+    // Leverage
+    lines.push('            <AIFLeverageInfo>');
+    lines.push('              <AIFLeverageArticle242>');
+    lines.push(`                ${tag('GrossMethodRate', rlev.gross_method)}`);
+    lines.push(`                ${tag('CommitmentMethodRate', rlev.commitment_method)}`);
+    lines.push('              </AIFLeverageArticle242>');
+    if (rlev.gross_limit !== null || rlev.commitment_limit !== null) {
+      lines.push('              <RegulatoryLeverageLimits>');
+      if (rlev.commitment_limit !== null) lines.push(`                ${tag('CommitmentMethodLimit', rlev.commitment_limit)}`);
+      if (rlev.gross_limit !== null) lines.push(`                ${tag('GrossMethodLimit', rlev.gross_limit)}`);
+      lines.push(`                ${tag('LeverageCompliant', rlev.leverage_compliant)}`);
+      lines.push('              </RegulatoryLeverageLimits>');
+    }
+    lines.push('            </AIFLeverageInfo>');
+
+    // Liquidity profile
+    lines.push('            <LiquidityProfile>');
+    lines.push('              <PortfolioLiquidityProfile>');
+    if (rrisk.liquidity.portfolio_liquidity_profile.length > 0) {
+      for (const b of rrisk.liquidity.portfolio_liquidity_profile) {
+        lines.push('                <PortfolioLiquidityBucket>');
+        lines.push(`                  ${tag('BucketPeriod', b.bucket)}`);
+        lines.push(`                  ${tag('BucketRate', b.pct)}`);
+        lines.push('                </PortfolioLiquidityBucket>');
+      }
+    }
+    lines.push('              </PortfolioLiquidityProfile>');
+    lines.push('              <InvestorLiquidityProfile>');
+    lines.push(`                ${tag('InvestorRedemptionFrequency', rrisk.liquidity.investor_redemption_frequency)}`);
+    lines.push('              </InvestorLiquidityProfile>');
+    if (rrisk.liquidity.liquidity_management_tools.length > 0) {
+      lines.push('              <LiquidityManagementTools>');
+      for (const tool of rrisk.liquidity.liquidity_management_tools) {
+        lines.push('                <LiquidityManagementTool>');
+        lines.push(`                  ${tag('LMTType', tool.type)}`);
+        lines.push(`                  ${tag('LMTActive', tool.active)}`);
+        lines.push(`                  ${tag('LMTDescription', tool.description)}`);
+        lines.push('                </LiquidityManagementTool>');
+      }
+      lines.push('              </LiquidityManagementTools>');
+    }
+    lines.push('            </LiquidityProfile>');
+
+    // Operational risk
+    lines.push('            <OperationalRisk>');
+    lines.push(`              ${tag('TotalOpenRiskFlags', rrisk.operational.total_open_risk_flags)}`);
+    lines.push(`              ${tag('HighSeverityFlags', rrisk.operational.high_severity_flags)}`);
+    lines.push('            </OperationalRisk>');
+
+    lines.push('          </AIFIndividualInfo>');
+    lines.push('        </AIFCompleteDescription>');
+
+    // Depositary
+    const dep = report.depositary;
+    if (dep && dep.name) {
+      lines.push('        <AIFDepositaryInfo>');
+      lines.push(`          ${tag('DepositaryName', dep.name)}`);
+      if (dep.lei) lines.push(`          ${tag('DepositaryLEI', dep.lei)}`);
+      lines.push(`          ${tag('DepositaryCountry', dep.jurisdiction || 'DE')}`);
+      lines.push(`          ${tag('DepositaryType', mapDepositaryType(dep.type))}`);
+      lines.push('        </AIFDepositaryInfo>');
+    }
+
+    // Compliance status as XML comment
+    lines.push(`        <!-- Compliance snapshot: KYC ${rcs.kyc_coverage_pct}%, eligible ${rcs.eligible_investor_pct}%, violations ${rcs.recent_violations}, checked ${rcs.last_compliance_check} -->`);
+
+    lines.push(`        ${tag('GeneratedAt', report.generated_at)}`);
+    lines.push(`        ${tag('ReportVersion', report.report_version)}`);
     lines.push('      </AIFRecordInfo>');
   }
 
