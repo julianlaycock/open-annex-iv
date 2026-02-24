@@ -157,4 +157,4 @@ npm test
 
 ## About
 
-Built by [Caelith Technologies](https://caelith.tech) — compliance infrastructure for EU fund managers.
+Built by [Caelith Technologies](https://www.caelith.tech) — compliance infrastructure for EU fund managers.
