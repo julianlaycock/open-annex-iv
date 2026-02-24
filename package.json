@@ -25,11 +25,11 @@
   "keywords": ["aifmd", "annex-iv", "esma", "xml", "regulatory-reporting", "compliance"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/caelith-tech/open-annex-iv"
+    "url": "https://github.com/julianlaycock/open-annex-iv"
   },
-  "homepage": "https://github.com/caelith-tech/open-annex-iv#readme",
+  "homepage": "https://github.com/julianlaycock/open-annex-iv#readme",
   "bugs": {
-    "url": "https://github.com/caelith-tech/open-annex-iv/issues"
+    "url": "https://github.com/julianlaycock/open-annex-iv/issues"
   },
   "author": "Caelith Technologies (https://caelith.tech)"
 }

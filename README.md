@@ -149,7 +149,7 @@ Covers: AIF Identification, Investor Concentration, Principal Exposures, Leverag
 Contributions welcome. Please open an issue first to discuss what you'd like to change.
 
 ```bash
-git clone https://github.com/caelith-tech/open-annex-iv.git
+git clone https://github.com/julianlaycock/open-annex-iv.git
 cd open-annex-iv
 npm install
 npm test
