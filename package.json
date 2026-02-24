@@ -1,0 +1,35 @@
+{
+  "name": "@open-annex-iv/core",
+  "version": "0.1.0",
+  "description": "Open-source AIFMD Annex IV XML serialization library. Converts plain report objects to ESMA-compliant XML.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "LICENSE", "README.md"],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --loader ts-node/esm tests/serializer.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0"
+  },
+  "keywords": ["aifmd", "annex-iv", "esma", "xml", "regulatory-reporting", "compliance"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caelith-tech/open-annex-iv"
+  },
+  "homepage": "https://github.com/caelith-tech/open-annex-iv#readme",
+  "bugs": {
+    "url": "https://github.com/caelith-tech/open-annex-iv/issues"
+  },
+  "author": "Caelith Technologies (https://caelith.tech)"
+}
