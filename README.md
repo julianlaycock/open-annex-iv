@@ -22,13 +22,13 @@ This library changes that.
 ## Installation
 
 ```bash
-npm install @open-annex-iv/core
+npm install open-annex-iv
 ```
 
 ## Quick Start
 
 ```typescript
-import { serializeAnnexIVToXml, type AnnexIVReport } from '@open-annex-iv/core';
+import { serializeAnnexIVToXml, type AnnexIVReport } from 'open-annex-iv';
 
 const report: AnnexIVReport = {
   aif_identification: {
@@ -119,7 +119,7 @@ import type {
   LiquidityBucket,
   GeographicExposure,
   CounterpartyExposure,
-} from '@open-annex-iv/core';
+} from 'open-annex-iv';
 ```
 
 ## ESMA Alignment

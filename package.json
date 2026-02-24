@@ -1,5 +1,5 @@
 {
-  "name": "@open-annex-iv/core",
+  "name": "open-annex-iv",
   "version": "0.1.0",
   "description": "Open-source AIFMD Annex IV XML serialization library. Converts plain report objects to ESMA-compliant XML.",
   "license": "Apache-2.0",
