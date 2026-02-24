@@ -15,7 +15,7 @@
   "files": ["dist", "LICENSE", "README.md"],
   "scripts": {
     "build": "tsc",
-    "test": "node --loader ts-node/esm tests/serializer.test.ts",
+    "test": "node --loader ts-node/esm tests/serializer.test.ts && node --loader ts-node/esm tests/helpers.test.ts && node --loader ts-node/esm tests/edge-cases.test.ts",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
