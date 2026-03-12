@@ -8,6 +8,8 @@ Open-source toolkit for generating **AIFMD Annex IV XML reports** — the regula
 
 **Zero dependencies. Pure functions. TypeScript-first.**
 
+> **Part of the Caelith open-source ecosystem.** Generate XML with `open-annex-iv`, then validate it with [`aifmd-toolkit`](https://github.com/julianlaycock/aifmd-toolkit).
+
 ## Why this exists
 
 Every AIFM in Europe must file Annex IV reports — quarterly or annually — to regulators like BaFin (DE), CSSF (LU), AMF (FR), or CNMV (ES). The XML format follows ESMA's technical standards (ESMA/2013/1358), but there are **zero open-source tools** to generate it. Fund managers either pay €15-50K/yr for enterprise software or build fragile Excel-to-XML pipelines in-house.
@@ -78,7 +80,7 @@ const report: AnnexIVReport = {
     },
     operational: { total_open_risk_flags: 0, high_severity_flags: 0 },
   },
-  geographic_focus: [{ region: 'Germany', percentage: 85.0 }],
+  geographic_focus: [{ region: 'Germany', pct: 85.0 }],
   counterparty_risk: { top_5_counterparties: [], total_counterparty_count: 0 },
   compliance_status: { kyc_coverage_pct: 100, eligible_investor_pct: 100, recent_violations: 0, last_compliance_check: '2025-03-31T00:00:00Z' },
   generated_at: '2025-03-31T12:00:00Z',
@@ -136,13 +138,19 @@ AIFReportingInfo → AIFMRecordInfo → AIFRecordInfo → sections
 
 Covers: AIF Identification, Investor Concentration, Principal Exposures, Leverage, Liquidity Risk, Counterparty Risk, Geographic Focus, Depositary Information.
 
+## Related Projects
+
+| Project | Description |
+|---|---|
+| [`aifmd-toolkit`](https://github.com/julianlaycock/aifmd-toolkit) | CLI for AIFMD II compliance — sanctions screening, LEI lookup, NCA profiles, Annex IV XML validation |
+| [Caelith](https://www.caelith.tech) | Full AIFMD II compliance platform — AI-powered filing, screening, and monitoring |
+
 ## Roadmap
 
 - [ ] XSD validation against ESMA schema (rev 6)
-- [ ] CLI tool for file-based report generation
 - [ ] AIFMD II (Directive 2024/927) field extensions
-- [ ] Python bindings
 - [ ] NCA submission format variants (BaFin, CSSF, AMF)
+- [ ] Python bindings
 
 ## Contributing
 
