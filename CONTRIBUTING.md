@@ -1,44 +1,50 @@
 # Contributing to open-annex-iv
 
-Thanks for your interest in contributing. This project aims to be the reference open-source implementation for AIFMD Annex IV regulatory reporting.
+Thank you for your interest in contributing. This library is used for regulatory filings submitted to EU NCAs, so accuracy and reliability are paramount.
 
-## Getting started
+## How to Contribute
+
+1. **Open an issue first** — describe the bug or feature before writing code
+2. **Fork the repository** and create a branch from `main`
+3. **Write tests** for any new functionality
+4. **Run the test suite** before submitting: `npm test`
+5. **Submit a pull request** with a clear description
+
+## Development Setup
 
 ```bash
 git clone https://github.com/julianlaycock/open-annex-iv.git
 cd open-annex-iv
 npm install
-npm test
 npm run build
+npm test
 ```
 
-## How to contribute
+## Code Standards
 
-1. **Open an issue first** — describe the bug or feature before writing code
-2. **Fork and branch** — create a feature branch from `main`
-3. **Write tests** — all new functionality needs tests
-4. **Run the test suite** — `npm test` must pass (179+ tests)
-5. **Submit a PR** — reference the issue in your pull request
+- **TypeScript strict mode** — all code must pass `tsc --strict`
+- **Zero runtime dependencies** (except `zod` for validation)
+- **Pure functions** — serializers must be deterministic (same input = same output)
+- **ESMA compliance** — any field mapping change must reference the relevant ESMA technical standard or XSD schema
 
-## Code style
+## Testing
 
-- TypeScript strict mode
-- Pure functions, no side effects
-- Zero runtime dependencies
-- XML output must align with ESMA technical standards (ESMA/2013/1358)
+- All exported functions must have tests
+- Field mapping tests should include real-world values from ESMA sample files
+- XSD validation tests require `libxmljs2` (optional native module)
+- Run: `npm test` (uses the built-in test runner)
 
-## Areas where help is needed
+## Regulatory Accuracy
 
-- XSD schema validation (we need the official ESMA schema files)
-- Additional ESMA code mappings (strategy types, instrument classifications)
-- NCA-specific filing documentation (BaFin, CSSF, AMF, CNMV, CBI)
-- Python bindings
-- AIFMD II (Directive 2024/927) field extensions
+If you're changing field mappings, code lists, or XML structure:
+- Reference the specific ESMA document (e.g., "AIFMD_DATAIF_V1.2.xsd Rev 6, element AIF_010")
+- Include before/after XML output in the PR description
+- Tag the PR with `regulatory` label
+
+## Code of Conduct
+
+Be respectful, constructive, and professional. This is a compliance tool used by regulated financial institutions — contributions should reflect that standard.
 
 ## License
 
 By contributing, you agree that your contributions will be licensed under the Apache 2.0 License.
-
-## About
-
-This project is maintained by [Caelith Technologies](https://caelith.tech) and open to community contributions.
