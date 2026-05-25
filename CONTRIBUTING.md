@@ -37,6 +37,7 @@ npm test
 ## Regulatory Accuracy
 
 If you're changing field mappings, code lists, or XML structure:
+
 - Reference the specific ESMA document (e.g., "AIFMD_DATAIF_V1.2.xsd Rev 6, element AIF_010")
 - Include before/after XML output in the PR description
 - Tag the PR with `regulatory` label

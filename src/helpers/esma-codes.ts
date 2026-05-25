@@ -22,9 +22,9 @@ export function mapToPredominantAIFType(legalForm: string, fundName?: string): s
   if (nameAndForm.includes('hedge')) return 'HFND';
   if (nameAndForm.includes('private equity')) return 'PEQF';
   if (nameAndForm.includes('fund of fund') || nameAndForm.includes('fof') || nameAndForm.includes('dachfonds')) return 'FOFS';
-  if (nameAndForm.includes('venture')) return 'VCAP';
-  if (nameAndForm.includes('infrastructure') || nameAndForm.includes('infrastruktur')) return 'INFR';
-  if (nameAndForm.includes('commodity') || nameAndForm.includes('rohstoff')) return 'COMF';
+  if (nameAndForm.includes('venture') || nameAndForm.includes('vc')) return 'PEQF';
+  if (nameAndForm.includes('infrastructure') || nameAndForm.includes('infrastruktur')) return 'PEQF';
+  if (nameAndForm.includes('commodity') || nameAndForm.includes('rohstoff')) return 'OTHR';
   const lower = (legalForm || '').toLowerCase();
   if (lower.includes('pe') && !lower.includes('spezial')) return 'PEQF';
   return 'OTHR';
@@ -39,15 +39,24 @@ export function mapDepositaryType(type: string | null | undefined): string {
   }
 }
 
-/** Map asset type string to ESMA SubAssetType code. */
+/** Map asset type string to ESMA SubAssetType code (AIFMD_DATAIF_V1.2.xsd). */
 export function mapAssetType(assetType: string): string {
   const lower = (assetType || '').toLowerCase();
   if (lower === 'fund' || lower.includes('share class') || lower.includes('unit class')) return 'SEC_LEQ_IFIN';
+  // Private equity / venture / unlisted equity → SEC_UEQ_UEQY (the only unlisted equity code in V1.2)
+  if (lower.includes('private_equity') || lower.includes('private equity') || lower.includes('venture') || lower.includes('unlisted')) return 'SEC_UEQ_UEQY';
   if (lower.includes('equity') || lower.includes('share')) return 'SEC_LEQ_IFIN';
-  if (lower.includes('bond') || lower.includes('debt') || lower.includes('fixed')) return 'SEC_CSH_BOND';
-  if (lower.includes('derivative') || lower.includes('swap')) return 'DER_EQD_SWPS';
-  if (lower.includes('real estate') || lower.includes('property')) return 'PHY_RES_RESD';
-  if (lower.includes('cash') || lower.includes('money market')) return 'SEC_CSH_MMKT';
+  if (lower.includes('convertible')) return 'SEC_CPN_INVG';
+  if (lower.includes('bond') || lower.includes('debt') || lower.includes('fixed') || lower.includes('loan')) return 'SEC_CPN_INVG';
+  if (lower.includes('derivative') || lower.includes('swap') || lower.includes('option') || lower.includes('future')) return 'DER_EQD_OTHD';
+  if (lower.includes('real estate') || lower.includes('property') || lower.includes('immobilien')) return 'PHY_RES_RESL';
+  // PHY_CTY_PCTY is the only physical commodity code in V1.2
+  if (lower.includes('commodity') || lower.includes('rohstoff')) return 'PHY_CTY_PCTY';
+  // PHY_TIM_PTIM — infrastructure / timber
+  if (lower.includes('infrastructure') || lower.includes('infrastruktur')) return 'PHY_TIM_PTIM';
+  // SEC_SSP_RMBS — structured/securitised products use SSP prefix, not SBD
+  if (lower.includes('structured') || lower.includes('cdo') || lower.includes('clo') || lower.includes('rmbs') || lower.includes('cmbs')) return 'SEC_SSP_RMBS';
+  if (lower.includes('cash') || lower.includes('money market')) return 'SEC_CSH_OTHC';
   return 'NTA_NTA_NOTA';
 }
 
